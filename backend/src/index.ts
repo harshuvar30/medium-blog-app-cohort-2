@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { decode, sign, verify } from "hono/jwt";
 import { signUpInput } from "@noob_coder/medium-common";
+import { cors } from 'hono/cors'
 type Bindings = {
   DATABASE_URL: string;
   JWT_SECRET: string;
@@ -17,7 +18,7 @@ type JWTPayload = {
 };
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
-
+app.use('/*',cors())
 app.use("/api/v1/blog/*", async (c, next) => {
   const jwt = c.req.header("Authorization");
   if (!jwt) {
@@ -43,8 +44,6 @@ app.get("/api/v1/get-user", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
-  // const body = await c.req.json()
-  // console.log("checking body values",body)
   const user = await prisma.user.findMany({});
   return c.json(user);
 });
@@ -52,7 +51,6 @@ app.post("/api/v1/signup", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
-
   const body = await c.req.json();
   const { success } = signUpInput.safeParse(body);
   if (!success) {
@@ -64,6 +62,7 @@ app.post("/api/v1/signup", async (c) => {
       data: {
         email: body.username,
         password: body.password,
+        name:body.name
       },
     });
     const jwt = await sign({ id: user.id }, c.env.JWT_SECRET);
@@ -77,11 +76,10 @@ app.post("/api/v1/signin", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
-
   const body = await c.req.json();
   const user = await prisma.user.findUnique({
     where: {
-      email: body.email,
+      email: body.username,
       password: body.password,
     },
   });
@@ -145,6 +143,16 @@ app.get("/api/v1/blog/:id", async (c) => {
     where: {
       id,
     },
+    select:{
+      id:true,
+      title:true,
+      content:true,
+      author:{
+        select:{
+          name:true
+        }
+      }
+    }
   });
 
   return c.json(post);
@@ -156,7 +164,16 @@ app.get("/api/v1/blog", async (c) => {
   }).$extends(withAccelerate());
 
   const post = await prisma.post.findMany({
-    where: {},
+   select:{
+    title:true,
+    content:true,
+    id:true,
+    author:{
+      select:{
+        name:true
+      }
+    }
+   }
   });
 
   return c.json(post);
