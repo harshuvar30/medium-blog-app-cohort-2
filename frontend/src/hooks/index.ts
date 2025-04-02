@@ -13,7 +13,7 @@ export const useBlog = ({id}:{id:string})=>{
     const [blog,setBlog] = useState<Blog | undefined>();
    
     useEffect(()=>{
-       axios.get(`http://127.0.0.1:8787/api/v1/blog/${id}`,{headers:{
+       axios.get(`https://backend.medium-blog-app.workers.dev/api/v1/blog/${id}`,{headers:{
            'Authorization':`Bearer ${localStorage.getItem('token')}`
        }})
        .then(response=>{
@@ -34,7 +34,7 @@ export const useBlogs = () =>{
  const [blogs,setBlogs] = useState([]);
 
  useEffect(()=>{
-    axios.get(`http://127.0.0.1:8787/api/v1/blog`,{headers:{
+    axios.get(`https://backend.medium-blog-app.workers.dev/api/v1/blog`,{headers:{
         'Authorization':`Bearer ${localStorage.getItem('token')}`
     }})
     .then(response=>{

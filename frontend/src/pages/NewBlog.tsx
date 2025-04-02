@@ -29,7 +29,7 @@ const NewBlog = () => {
             <PostField  onChange={(e)=>{setPost(e.target.value)}}/>
             <button
             onClick={async()=>{
-               const response = await axios.post(`http://127.0.0.1:8787/api/v1/blog`,
+               const response = await axios.post(`https://backend.medium-blog-app.workers.dev/api/v1/blog`,
                     {
                         title,
                         content:post

@@ -41,7 +41,7 @@ const Auth = ({ type }: { type: "signup" | "signin" }) => {
 
   async function sendReq(){
   try{
-    const response = await axios.post(`http://127.0.0.1:8787/api/v1/${type === "signup"? "signup":"signin"}`,postInput)
+    const response = await axios.post(`https://backend.medium-blog-app.workers.dev/api/v1/${type === "signup"? "signup":"signin"}`,postInput)
 
    const jwt = response.data.token
    localStorage.setItem("token",jwt)
